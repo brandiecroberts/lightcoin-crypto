@@ -1,0 +1,75 @@
+class Account {
+
+  constructor() {
+    this.transactions = [];
+  }
+
+  get balance() {
+    let balance = 0;
+    for (let t of this.transactions) {
+      balance += t.value;
+    }
+    return balance;
+  }
+  addTransaction(transaction) {
+    this.transactions.push(transaction);
+  }
+}
+
+class Transaction {
+
+  constructor(amount, account) {
+    this.amount = amount;
+    this.account = account;
+  }
+  commit() {
+    if (!this.isAllowed()) return false;
+    this.time = new Date();
+    this.account.addTransaction(this);
+    return true;
+  }
+}
+
+class Deposit extends Transaction {
+
+  get value() {
+    return this.amount;
+  }
+  isAllowed() {
+    return true;
+  }
+}
+
+class Withdrawal extends Transaction {
+
+  get value() {
+    return -this.amount;
+  }
+  isAllowed() {
+    return (this.account.balance - this.amount >= 0);
+  }
+}
+
+//DRIVER CODE:
+const myAccount = new Account("joedirt");
+
+console.log('Starting Balance:', myAccount.balance);
+
+console.log('Attempting to withdraw $1 should fail...');
+const t1 = new Withdrawal(1.00, myAccount);
+console.log('Commit result:', t1.commit());
+console.log('Account Balance: ', myAccount.balance);
+
+console.log('Depositing money into my account...');
+const t2 = new Deposit(200, myAccount);
+console.log('Commit result:', t2.commit());
+console.log('Account Balance: ', myAccount.balance);
+
+console.log('Withdrawal for $200 should be allowed...');
+const t3 = new Withdrawal(200, myAccount);
+console.log('Commit result:', t3.commit());
+
+console.log('Remaining Balance: ', myAccount.balance);
+console.log("Looks like I'm broke!");
+
+console.log('Account Transaction History: ', myAccount.transactions);
